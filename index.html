@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Lab 4: Converting to GeoJSON</title>
+	<!-- the Leaflet CSS -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+	<!-- the Leaflet JavaScript library -->
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+	<script type="text/javascript" script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+	<!-- Leaflet.markercluster CSS links -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+	<!-- Leaflet.markercluster JS link -->
+	<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+	<!--CSS styles-->
+	<style>
+				body {
+						font-family: sans-serif;
+						max-width: 900px;
+						margin: auto;
+			  }
+						h1 {
+							font-family: Calibri, sans-serif;
+							color: #0066ff;
+							font-size: 100px;
+							text-shadow: 6px 6px 15px white;
+							font-weight: bold;
+							text-align: center;
+							margin-bottom: 20px;
+						}
+						p1
+						 {
+							font-family: Times New Roman, sans-serif;
+							color: #000000;
+							font-size: 20px;
+							text-shadow: 2px 2px 5px white;
+							font-weight: bold;
+							margin-bottom: 20px;
+							background-color: lightblue;
+							text-align: center;
+							border-style: hidden;
+							border-color: #00cc00;
+							width: fit-content;
+						}
+						p2
+						 {
+							font-family: Times New Roman, sans-serif;
+							color: #ffffff;
+							font-size: 15px;
+							text-shadow: 2px 2px 5px white;
+							font-weight: bold;
+							text-align: center;
+						}
+						body {
+								background-image: url('Cambridge.jfif');
+								background-repeat: no-repeat;
+								background-attachment: fixed;
+								background-size: cover;
+								}
+	</style>
+</head>
+
+<body>
+	<h1>The Bike Racks of Cambridge, MA </h1>
+
+	<!-- code where we create and name the container that holds the map -->
+	<div id="map" style="height: 70vh"></div>
+
+	<p1> <br>The map above shows the location, storage capacity (number of bikes), and rack status of bike racks in Cambridge, MA.
+		The interactive map clusters point markers into three color-coded categories (orange, yellow, and green) with orange
+		symbolizing the most densely clustered areas and green being the least densely clustered. Each cluster marker has the
+		number of racks contained within the respective cluster at the current zoom level numerically represented in the center of
+		the marker.<br>
+	</p1>
+	<p2> Bike rack data from: https://www.cambridgema.gov/GIS/gisdatadictionary/Recreation/RECREATION_BikeRacks<br></p2>
+	<p2> Background image: https://images.app.goo.gl/NeBi8jicbpzYcr19A</p2>
+	<script>
+		var mymap = L.map('map').setView([42.3736, -71.1097], 12.5);
+		var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png', {
+			attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		})
+		.addTo(mymap);
+		var myIcon = L.icon({
+    iconUrl: 'bikerack.svg',
+		iconSize: [32, 32], // size of the icon
+		});
+		// Add bike rack data as a vector layer
+		$.getJSON("https://raw.githubusercontent.com/jserfass/GIS-503-Lab4/main/json/BikeRacks.json",function(racks){
+			var bikeracks = L.geoJson(racks, {
+			 pointToLayer: function(feature, latlng){
+					 var marker = L.marker(latlng,{icon:myIcon});
+					 marker.bindPopup("Capacity: " + feature.properties.Capacity + "<br>Status: " + feature.properties.Status);
+					 return marker;
+			 }
+	 	});
+		var clusters = L.markerClusterGroup({showCoverageOnHover: false})
+	 	clusters.addLayer(bikeracks);
+	 	mymap.addLayer(clusters);
+		});
+	</script>
+</body>
+</html>
